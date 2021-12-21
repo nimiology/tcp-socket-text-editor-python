@@ -4,8 +4,8 @@ import threading
 import asyncio
 
 # server Configs
-HOST, PORT = '127.0.0.1', 65432
-
+SERVER = '127.0.0.1'
+PORT = 1212
 # text
 txt = ''
 
@@ -31,7 +31,7 @@ class EchoServerProtocol(asyncio.Protocol):
         self.transport = transport
 
     def data_received(self, data):
-        message = data.decode()
+        message = data.decode('utf8')
         print('Data received: {!r}'.format(message))
 
         # self.transport.write(data)
@@ -83,13 +83,14 @@ class EchoServerProtocol(asyncio.Protocol):
             # print('Close the client socket')
             # self.transport.close()
 
-
+#todo: work on stream server
 async def run_server():
     # Get a reference to the event loop as we plan to use
     # low-level APIs.
     loop = asyncio.get_running_loop()
 
-    server = await loop.create_server(lambda: EchoServerProtocol(), HOST, PORT)
+    server = await loop.create_server(lambda: EchoServerProtocol(), SERVER, PORT)
+    print(f'[LISTENING] Sever is listening on {SERVER}:{PORT}')
 
     async with server:
         await server.serve_forever()
