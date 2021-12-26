@@ -1,4 +1,6 @@
+import pickle
 import socket
+import struct
 from datetime import datetime
 import threading
 import asyncio
@@ -31,13 +33,35 @@ class EchoServerProtocol(asyncio.Protocol):
         self.transport = transport
 
     def data_received(self, data):
-        message = data.decode('utf8')
+        message = pickle.loads(data)
         print('Data received: {!r}'.format(message))
+        # data = b""
+        # payload_size = struct.calcsize("Q")
+        # while True:
+        #     try:
+        #         while len(data) < payload_size:
+        #             packet = client_socket.recv(4 * 1024)  # 4K
+        #             if not packet: break
+        #             data += packet
+        #         packed_msg_size = data[:payload_size]
+        #         data = data[payload_size:]
+        #         msg_size = struct.unpack("Q", packed_msg_size)[0]
+        #         while len(data) < msg_size:
+        #             data += client_socket.recv(4 * 1024)
+        #         frame_data = data[:msg_size]
+        #         data = data[msg_size:]
+        #         frame = pickle.loads(frame_data)
+        #         stream.write(frame)
+        #
+        #     except:
+        #
+        #         break
 
         # self.transport.write(data)
         """Handler for conncetions"""
         global last_edit, editor, USERS, txt
         print('Connected by', self.transport.get_extra_info('sockname'))
+        print(type(message))
         data = message
         if data != 'dc':
             if data.split(':')[0] == 'name':

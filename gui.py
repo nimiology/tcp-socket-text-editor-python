@@ -3,6 +3,7 @@
 import pickle
 import struct
 import time
+from os import system, name
 
 import cv2
 from os import error
@@ -28,7 +29,13 @@ ADDR = (SERVER, PORT)
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
 
-
+def clear():
+    # for windows
+    if name == 'nt':
+        _ = system('cls')
+    # for mac and linux(here, os.name is 'posix')
+    else:
+        _ = system('clear')
 class GUI:
     def __init__(self):
         self.window = Tk()
@@ -133,14 +140,27 @@ class GUI:
 
     def send_data(self, message):
         while True:
-            client.send(message.encode())
+            client.send(pickle.dumps(message))
             break
 
     def stream(self):
+        t = time.time()
         while True:
             img = pyautogui.screenshot()
             a = pickle.dumps(img)
             client.sendall(struct.pack("Q", len(a)) + a)
 
+            print(f'FPS: {60/(time.time() - t)}')
+            clear()
+            t = time.time()
 
-g = GUI().stream()
+
+# g = GUI()
+t = time.time()
+while True:
+    img = pyautogui.screenshot()
+    a = pickle.dumps(img)
+    client.sendall(a)
+    print(f'FPS: {60/(time.time() - t)}')
+    clear()
+    t = time.time()
