@@ -1,126 +1,81 @@
-import pickle
 import socket
 import struct
-from datetime import datetime
 import threading
-import asyncio
+import pickle
+import cv2
 
-# server Configs
-SERVER = '127.0.0.1'
-PORT = 1212
-# text
-txt = ''
+HOST = socket.gethostbyname('localhost')
+PORT = 2412
+ADDR = (HOST, PORT)
+DISCONNECT_MESSAGE = '!DISCONNECT'
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind(ADDR)
 
-# users
-USERS = {}
-editor = ''
-
-# last edit
-last_edit = datetime(2001, 2, 3, 4, 5, 6)
+USERS = []
 
 
-def send_all(data):
-    """send the str(data) to all connections"""
-    global USERS
-    for i in USERS.keys():
-        i.write(data.encode())
+def SENDMSG(text, new):
+    for PERSON in USERS:
+        if PERSON != new:
+            PERSON.send(pickle.dumps(text))
 
 
-class EchoServerProtocol(asyncio.Protocol):
-    def connection_made(self, transport):
-        peername = transport.get_extra_info('socknet')
-        print('Connection from {}'.format(peername))
-        self.transport = transport
+def client_handle(conn, addr):
+    print(f'[NEW CONNECTION] {addr} conneted')
+    connected = True
+    data = b""
+    payload_size = struct.calcsize("Q")
+    while True:
+        while len(data) < payload_size:
+            packet = server.recv(4 * 1024)  # 4K
+            if not packet:
+                break
+            data += packet
+        packed_msg_size = data[:payload_size]
+        data = data[payload_size:]
+        msg_size = struct.unpack("Q", packed_msg_size)[0]
 
-    def data_received(self, data):
-        message = pickle.loads(data)
-        print('Data received: {!r}'.format(message))
-        # data = b""
-        # payload_size = struct.calcsize("Q")
-        # while True:
-        #     try:
-        #         while len(data) < payload_size:
-        #             packet = client_socket.recv(4 * 1024)  # 4K
-        #             if not packet: break
-        #             data += packet
-        #         packed_msg_size = data[:payload_size]
-        #         data = data[payload_size:]
-        #         msg_size = struct.unpack("Q", packed_msg_size)[0]
-        #         while len(data) < msg_size:
-        #             data += client_socket.recv(4 * 1024)
-        #         frame_data = data[:msg_size]
-        #         data = data[msg_size:]
-        #         frame = pickle.loads(frame_data)
-        #         stream.write(frame)
-        #
-        #     except:
-        #
-        #         break
+        while len(data) < msg_size:
+            data += server.recv(4 * 1024)
+        frame_data = data[:msg_size]
+        data = data[msg_size:]
+        frame = pickle.loads(frame_data)
+        cv2.imshow("RECEIVING VIDEO", frame)
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'):
+            break
+    # while connected:
+    #     msg_length = conn.recv(2048).decode(FORMAT)
+    #     if msg_length:
+    #         msg_length = int(msg_length)
+    #         msg = conn.recv(msg_length).decode(FORMAT)
+    #         if msg == DISCONNECT_MESSAGE:
+    #             connected = False
+    #             OTHERS.remove(conn)
+    #
+    #         print(f'[{addr}] {msg}')
+    #         SENDMSG(
+    #             f'___________________________________________\n'
+    #             f'[NEW MESSAGE]New message from {addr[0]} :\n{msg}\n'
+    #             f'___________________________________________\n',conn)
 
-        # self.transport.write(data)
-        """Handler for conncetions"""
-        global last_edit, editor, USERS, txt
-        print('Connected by', self.transport.get_extra_info('sockname'))
-        print(type(message))
-        data = message
-        if data != 'dc':
-            if data.split(':')[0] == 'name':
-                # input should be in form of "name:<name>"
-                name = data.split(':')[1]
-                if USERS.get(self.transport):
-                    self.transport.write(b'You have already chosen a name')
-                else:
-                    if name in USERS.values():
-                        self.transport.write(b'This name is already taken')
-                    else:
-                        USERS[self.transport] = name
-                        send_all(f'{name} joined.')
-
-            # editing txt
-            # ? input in form of "edit:<txt>"
-            elif data.split(':')[0] == 'edit':
-                # check registered or not
-                if self.transport not in USERS.keys():
-                    self.transport.write(b'You are not registered')
-                else:
-                    # check last_Edit time less than 5 seconds
-                    if editor == self.transport or (datetime.now() -
-                                                    last_edit).seconds > 5:
-                        if editor != self.transport:
-                            editor = self.transport
-                            send_all(f'editor:{USERS[self.transport]}')
-                        last_edit = datetime.now()
-                        # edit
-                        txt = data.split(':')[1]
-                        send_all(f'txt:{txt}')
-
-                    else:
-                        self.transport.write(b'status:Editing is on cooldown')
-        else:
-            # disconnecting
-            name = USERS.get(self.transport)
-            USERS.pop(self.transport)
-            self.transport.write(b'dc')
-            send_all(f'user {name} disconnected')
-            self.transport.close()
-
-            # print('Close the client socket')
-            # self.transport.close()
-
-#todo: work on stream server
-async def run_server():
-    # Get a reference to the event loop as we plan to use
-    # low-level APIs.
-    loop = asyncio.get_running_loop()
-
-    server = await loop.create_server(lambda: EchoServerProtocol(), SERVER, PORT)
-    print(f'[LISTENING] Sever is listening on {SERVER}:{PORT}')
-
-    async with server:
-        await server.serve_forever()
+    conn.close()
 
 
-# try:
-asyncio.run(run_server())
-# except:
-#     print('Error')
+def start():
+    server.listen()
+    print(f'[LISTENING] Sever is listening on {HOST}:{PORT}')
+    while True:
+        conn, addr = server.accept()
+        thread = threading.Thread(target=client_handle, args=(conn, addr))
+        thread.start()
+        USERS.append(conn)
+        SENDMSG(f'___________________________________________\n'
+                f'[NEW CONNECTION]{addr[0]} connected'
+                f'\n___________________________________________\n', conn)
+        print(f'\n[ACTIVE CONNECTIONS] {threading.activeCount() - 1}')
+
+
+if __name__ == '__main__':
+    print('[STARTING] server is starting....')
+    start()
