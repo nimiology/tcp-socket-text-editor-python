@@ -3,9 +3,10 @@ import struct
 import threading
 import pickle
 import cv2
+import numpy
 
 HOST = socket.gethostbyname('localhost')
-PORT = 2412
+PORT = 1212
 ADDR = (HOST, PORT)
 DISCONNECT_MESSAGE = '!DISCONNECT'
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -22,24 +23,22 @@ def SENDMSG(text, new):
 
 def client_handle(conn, addr):
     print(f'[NEW CONNECTION] {addr} conneted')
-    connected = True
     data = b""
     payload_size = struct.calcsize("Q")
     while True:
         while len(data) < payload_size:
-            packet = server.recv(4 * 1024)  # 4K
-            if not packet:
-                break
-            data += packet
+            data += conn.recv(819200)
         packed_msg_size = data[:payload_size]
         data = data[payload_size:]
         msg_size = struct.unpack("Q", packed_msg_size)[0]
-
         while len(data) < msg_size:
-            data += server.recv(4 * 1024)
+            data += conn.recv(409600)
         frame_data = data[:msg_size]
         data = data[msg_size:]
+        print(type(pickle.loads(frame_data)))
         frame = pickle.loads(frame_data)
+        img_np = numpy.array(frame)
+        frame = cv2.cvtColor(img_np, cv2.COLOR_BGR2RGB)
         cv2.imshow("RECEIVING VIDEO", frame)
         key = cv2.waitKey(1) & 0xFF
         if key == ord('q'):

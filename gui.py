@@ -194,7 +194,8 @@ t = time.time()
 while True:
     img = pyautogui.screenshot()
     a = pickle.dumps(img)
-    client.sendall(a)
+    message = struct.pack("Q", len(a)) + a
+    client.sendall(message)
     print(f'FPS: {60/(time.time() - t)}')
     clear()
     t = time.time()
