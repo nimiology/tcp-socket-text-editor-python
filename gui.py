@@ -38,75 +38,109 @@ def clear():
         _ = system('clear')
 class GUI:
     def __init__(self):
-        self.window = Tk()
+        window = Tk()
 
-        self.window.geometry("740x607")
-        self.window.configure(bg="#1F1F1F")
+        window.geometry("700x400")
+        window.configure(bg="#F9F9F9")
 
-        self.canvas1 = Canvas(
-            self.window,
-            bg="#1F1F1F",
-            height=607,
-            width=740,
+        canvas = Canvas(
+            window,
+            bg="#F9F9F9",
+            height=400,
+            width=700,
             bd=0,
             highlightthickness=0,
-            relief="ridge",
+            relief="ridge"
         )
 
-        self.canvas1.place(x=0, y=0)
-        self.entry_image_1 = PhotoImage(file=relative_to_assets("entry_1.png"))
-        self.entry_bg_1 = self.canvas1.create_image(209.0,
-                                                    337.0,
-                                                    image=self.entry_image_1)
-        self.entry_1 = CustomText(
+        canvas.place(x=0, y=0)
+        entry_image_1 = PhotoImage(
+            file=relative_to_assets("entry_1.png"))
+        entry_bg_1 = canvas.create_image(
+            265.5,
+            177.0,
+            image=entry_image_1
+        )
+        entry_1 = Text(
             bd=0,
-            bg="#C4C4C4",
-            highlightthickness=0,
-            font=("Calibri 24"),
+            bg="#BCBAB8",
+            highlightthickness=0
         )
-        self.entry_1.bind("<<TextModified>>", self.onModification)
-        self.entry_1.place(x=28.0, y=95.0, width=362.0, height=482.0)
+        entry_1.place(
+            x=57.0,
+            y=28.0,
+            width=417.0,
+            height=296.0
+        )
 
-        self.entry_image_2 = PhotoImage(file=relative_to_assets("entry_2.png"))
-        self.entry_bg_2 = self.canvas1.create_image(569.0,
-                                                    337.0,
-                                                    image=self.entry_image_2)
-        self.entry_2 = Text(bd=0, bg="#C4C4C4", highlightthickness=0)
-        self.entry_2.place(x=429.0, y=95.0, width=280.0, height=482.0)
-
-        self.entry_image_3 = PhotoImage(file=relative_to_assets("entry_3.png"))
-        self.entry_bg_3 = self.canvas1.create_image(269.5,
-                                                    41.0,
-                                                    image=self.entry_image_3)
-        self.entry_3 = Entry(
+        entry_image_2 = PhotoImage(
+            file=relative_to_assets("entry_2.png"))
+        entry_bg_2 = canvas.create_image(
+            589.5,
+            177.0,
+            image=entry_image_2
+        )
+        entry_2 = Text(
             bd=0,
-            bg="#E7E7E7",
-            highlightthickness=0,
-            font=("Calibri 24"),
+            bg="#BCBAB8",
+            highlightthickness=0
         )
-        self.entry_3.place(x=159.0, y=15.0, width=221.0, height=50.0)
+        entry_2.place(
+            x=518.0,
+            y=28.0,
+            width=143.0,
+            height=296.0
+        )
 
-        self.canvas1.create_text(28.0,
-                                 24.0,
-                                 anchor="nw",
-                                 text="Name:\n",
-                                 fill="#FFFFFF",
-                                 font=("Roboto", 24 * -1))
-        self.button_image_1 = PhotoImage(
+        button_image_1 = PhotoImage(
             file=relative_to_assets("button_1.png"))
-        # send name button
-        self.button_1 = Button(
-            image=self.button_image_1,
+        button_1 = Button(
+            image=button_image_1,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: self.sign_name(self.entry_3.get()),
-            relief="flat")
-        self.button_1.place(x=487.0,
-                            y=15.0,
-                            width=180.890625,
-                            height=51.8360595703125)
-        self.window.resizable(False, False)
-        self.window.mainloop()
+            command=lambda: print("button_1 clicked"),
+            relief="flat"
+        )
+        button_1.place(
+            x=570.0,
+            y=341.0,
+            width=93.0,
+            height=39.0
+        )
+
+        button_image_2 = PhotoImage(
+            file=relative_to_assets("button_2.png"))
+        button_2 = Button(
+            image=button_image_2,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: print("button_2 clicked"),
+            relief="flat"
+        )
+        button_2.place(
+            x=451.0,
+            y=341.0,
+            width=93.0,
+            height=39.0
+        )
+
+        button_image_3 = PhotoImage(
+            file=relative_to_assets("button_3.png"))
+        button_3 = Button(
+            image=button_image_3,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: print("button_3 clicked"),
+            relief="flat"
+        )
+        button_3.place(
+            x=342.0,
+            y=341.0,
+            width=93.0,
+            height=39.0
+        )
+        window.resizable(False, False)
+        window.mainloop()
 
     def onModification(self, event):
         chars = event.widget.get("1.0", "end-1c")
@@ -155,7 +189,7 @@ class GUI:
             t = time.time()
 
 
-# g = GUI()
+g = GUI()
 t = time.time()
 while True:
     img = pyautogui.screenshot()
