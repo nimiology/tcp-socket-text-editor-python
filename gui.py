@@ -182,20 +182,10 @@ class GUI:
         while True:
             img = pyautogui.screenshot()
             a = pickle.dumps(img)
-            client.sendall(struct.pack("Q", len(a)) + a)
-
-            print(f'FPS: {60/(time.time() - t)}')
+            message = struct.pack("Q", len(a)) + a
+            client.sendall(message)
+            print(f'FPS: {60 / (time.time() - t)}')
             clear()
             t = time.time()
 
-
 g = GUI()
-t = time.time()
-while True:
-    img = pyautogui.screenshot()
-    a = pickle.dumps(img)
-    message = struct.pack("Q", len(a)) + a
-    client.sendall(message)
-    print(f'FPS: {60/(time.time() - t)}')
-    clear()
-    t = time.time()
