@@ -6,16 +6,17 @@ import datetime
 
 
 class Server:
-    host = socket.gethostbyname('localhost')
-    port = 1212
-    addr = (host, port)
-    DISCONNECT_MESSAGE = '!DISCONNECT'
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(addr)
-    who_is_streaming = None
-    stream_cooldown = None
-    users = []
-    payload_size = struct.calcsize("Q")
+    def __init__(self):
+        self.host = socket.gethostbyname('localhost')
+        self.port = 1212
+        self.addr = (self.host, self.port)
+        self.DISCONNECT_MESSAGE = '!DISCONNECT'
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.bind(self.addr)
+        self.who_is_streaming = None
+        self.stream_cooldown = None
+        self.users = []
+        self.payload_size = struct.calcsize("Q")
 
     def pack(self, data):
         a = pickle.dumps(data)

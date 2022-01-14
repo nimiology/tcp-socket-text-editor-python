@@ -39,111 +39,112 @@ def clear():
     else:
         _ = system('clear')
 class GUI:
-    payload_size = struct.calcsize("Q")
-    # gui
-    window = Tk()
+    def __init__(self):
+        self.payload_size = struct.calcsize("Q")
+        # gui
+        window = Tk()
 
-    window.geometry("700x400")
-    window.configure(bg="#F9F9F9")
+        window.geometry("700x400")
+        window.configure(bg="#F9F9F9")
 
-    canvas = Canvas(
-        window,
-        bg="#F9F9F9",
-        height=400,
-        width=700,
-        bd=0,
-        highlightthickness=0,
-        relief="ridge"
-    )
+        canvas = Canvas(
+            window,
+            bg="#F9F9F9",
+            height=400,
+            width=700,
+            bd=0,
+            highlightthickness=0,
+            relief="ridge"
+        )
 
-    canvas.place(x=0, y=0)
-    entry_image_1 = PhotoImage(
-        file=relative_to_assets("entry_1.png"))
-    entry_bg_1 = canvas.create_image(
-        265.5,
-        177.0,
-        image=entry_image_1
-    )
-    entry_1 = Text(
-        bd=0,
-        bg="#BCBAB8",
-        highlightthickness=0
-    )
-    entry_1.place(
-        x=57.0,
-        y=28.0,
-        width=417.0,
-        height=296.0
-    )
+        canvas.place(x=0, y=0)
+        entry_image_1 = PhotoImage(
+            file=relative_to_assets("entry_1.png"))
+        entry_bg_1 = canvas.create_image(
+            265.5,
+            177.0,
+            image=entry_image_1
+        )
+        self.entry_1 = Text(
+            bd=0,
+            bg="#BCBAB8",
+            highlightthickness=0
+        )
+        self.entry_1.place(
+            x=57.0,
+            y=28.0,
+            width=417.0,
+            height=296.0
+        )
 
-    entry_image_2 = PhotoImage(
-        file=relative_to_assets("entry_2.png"))
-    entry_bg_2 = canvas.create_image(
-        589.5,
-        177.0,
-        image=entry_image_2
-    )
-    entry_2 = Text(
-        bd=0,
-        bg="#BCBAB8",
-        highlightthickness=0
-    )
-    entry_2.place(
-        x=518.0,
-        y=28.0,
-        width=143.0,
-        height=296.0
-    )
+        entry_image_2 = PhotoImage(
+            file=relative_to_assets("entry_2.png"))
+        entry_bg_2 = canvas.create_image(
+            589.5,
+            177.0,
+            image=entry_image_2
+        )
+        self.entry_2 = Text(
+            bd=0,
+            bg="#BCBAB8",
+            highlightthickness=0
+        )
+        self.entry_2.place(
+            x=518.0,
+            y=28.0,
+            width=143.0,
+            height=296.0
+        )
 
-    button_image_1 = PhotoImage(
-        file=relative_to_assets("button_1.png"))
-    button_1 = Button(
-        image=button_image_1,
-        borderwidth=0,
-        highlightthickness=0,
-        command=lambda: print("button_1 clicked"),
-        relief="flat"
-    )
-    button_1.place(
-        x=570.0,
-        y=341.0,
-        width=93.0,
-        height=39.0
-    )
+        button_image_1 = PhotoImage(
+            file=relative_to_assets("button_1.png"))
+        button_1 = Button(
+            image=button_image_1,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: print("button_1 clicked"),
+            relief="flat"
+        )
+        button_1.place(
+            x=570.0,
+            y=341.0,
+            width=93.0,
+            height=39.0
+        )
 
-    button_image_2 = PhotoImage(
-        file=relative_to_assets("button_2.png"))
-    button_2 = Button(
-        image=button_image_2,
-        borderwidth=0,
-        highlightthickness=0,
-        command=lambda: print("button_2 clicked"),
-        relief="flat"
-    )
-    button_2.place(
-        x=451.0,
-        y=341.0,
-        width=93.0,
-        height=39.0
-    )
+        button_image_2 = PhotoImage(
+            file=relative_to_assets("button_2.png"))
+        button_2 = Button(
+            image=button_image_2,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: print("button_2 clicked"),
+            relief="flat"
+        )
+        button_2.place(
+            x=451.0,
+            y=341.0,
+            width=93.0,
+            height=39.0
+        )
 
-    button_image_3 = PhotoImage(
-        file=relative_to_assets("button_3.png"))
-    button_3 = Button(
-        image=button_image_3,
-        borderwidth=0,
-        highlightthickness=0,
-        command=lambda: print("button_3 clicked"),
-        relief="flat"
-    )
-    button_3.place(
-        x=342.0,
-        y=341.0,
-        width=93.0,
-        height=39.0
-    )
-    window.resizable(False, False)
-    window.mainloop()
+        button_image_3 = PhotoImage(
+            file=relative_to_assets("button_3.png"))
+        button_3 = Button(
+            image=button_image_3,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: self.stream(),
+            relief="flat"
+        )
+        button_3.place(
+            x=342.0,
+            y=341.0,
+            width=93.0,
+            height=39.0
+        )
+        window.resizable(False, False)
+        window.mainloop()
 
     def onModification(self, event):
         chars = event.widget.get("1.0", "end-1c")
@@ -212,4 +213,4 @@ class GUI:
         if key == ord('q'):
             return
 
-g = GUI().stream()
+g = GUI()
