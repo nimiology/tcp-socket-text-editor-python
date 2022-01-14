@@ -10,6 +10,8 @@ from os import error
 from pathlib import Path
 import threading, socket
 from tkinter import *
+
+import numpy
 import pyautogui as pyautogui
 from comp import CustomText
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
@@ -37,110 +39,111 @@ def clear():
     else:
         _ = system('clear')
 class GUI:
-    def __init__(self):
-        window = Tk()
+    payload_size = struct.calcsize("Q")
+    # gui
+    window = Tk()
 
-        window.geometry("700x400")
-        window.configure(bg="#F9F9F9")
+    window.geometry("700x400")
+    window.configure(bg="#F9F9F9")
 
-        canvas = Canvas(
-            window,
-            bg="#F9F9F9",
-            height=400,
-            width=700,
-            bd=0,
-            highlightthickness=0,
-            relief="ridge"
-        )
+    canvas = Canvas(
+        window,
+        bg="#F9F9F9",
+        height=400,
+        width=700,
+        bd=0,
+        highlightthickness=0,
+        relief="ridge"
+    )
 
-        canvas.place(x=0, y=0)
-        entry_image_1 = PhotoImage(
-            file=relative_to_assets("entry_1.png"))
-        entry_bg_1 = canvas.create_image(
-            265.5,
-            177.0,
-            image=entry_image_1
-        )
-        entry_1 = Text(
-            bd=0,
-            bg="#BCBAB8",
-            highlightthickness=0
-        )
-        entry_1.place(
-            x=57.0,
-            y=28.0,
-            width=417.0,
-            height=296.0
-        )
+    canvas.place(x=0, y=0)
+    entry_image_1 = PhotoImage(
+        file=relative_to_assets("entry_1.png"))
+    entry_bg_1 = canvas.create_image(
+        265.5,
+        177.0,
+        image=entry_image_1
+    )
+    entry_1 = Text(
+        bd=0,
+        bg="#BCBAB8",
+        highlightthickness=0
+    )
+    entry_1.place(
+        x=57.0,
+        y=28.0,
+        width=417.0,
+        height=296.0
+    )
 
-        entry_image_2 = PhotoImage(
-            file=relative_to_assets("entry_2.png"))
-        entry_bg_2 = canvas.create_image(
-            589.5,
-            177.0,
-            image=entry_image_2
-        )
-        entry_2 = Text(
-            bd=0,
-            bg="#BCBAB8",
-            highlightthickness=0
-        )
-        entry_2.place(
-            x=518.0,
-            y=28.0,
-            width=143.0,
-            height=296.0
-        )
+    entry_image_2 = PhotoImage(
+        file=relative_to_assets("entry_2.png"))
+    entry_bg_2 = canvas.create_image(
+        589.5,
+        177.0,
+        image=entry_image_2
+    )
+    entry_2 = Text(
+        bd=0,
+        bg="#BCBAB8",
+        highlightthickness=0
+    )
+    entry_2.place(
+        x=518.0,
+        y=28.0,
+        width=143.0,
+        height=296.0
+    )
 
-        button_image_1 = PhotoImage(
-            file=relative_to_assets("button_1.png"))
-        button_1 = Button(
-            image=button_image_1,
-            borderwidth=0,
-            highlightthickness=0,
-            command=lambda: print("button_1 clicked"),
-            relief="flat"
-        )
-        button_1.place(
-            x=570.0,
-            y=341.0,
-            width=93.0,
-            height=39.0
-        )
+    button_image_1 = PhotoImage(
+        file=relative_to_assets("button_1.png"))
+    button_1 = Button(
+        image=button_image_1,
+        borderwidth=0,
+        highlightthickness=0,
+        command=lambda: print("button_1 clicked"),
+        relief="flat"
+    )
+    button_1.place(
+        x=570.0,
+        y=341.0,
+        width=93.0,
+        height=39.0
+    )
 
-        button_image_2 = PhotoImage(
-            file=relative_to_assets("button_2.png"))
-        button_2 = Button(
-            image=button_image_2,
-            borderwidth=0,
-            highlightthickness=0,
-            command=lambda: print("button_2 clicked"),
-            relief="flat"
-        )
-        button_2.place(
-            x=451.0,
-            y=341.0,
-            width=93.0,
-            height=39.0
-        )
+    button_image_2 = PhotoImage(
+        file=relative_to_assets("button_2.png"))
+    button_2 = Button(
+        image=button_image_2,
+        borderwidth=0,
+        highlightthickness=0,
+        command=lambda: print("button_2 clicked"),
+        relief="flat"
+    )
+    button_2.place(
+        x=451.0,
+        y=341.0,
+        width=93.0,
+        height=39.0
+    )
 
-        button_image_3 = PhotoImage(
-            file=relative_to_assets("button_3.png"))
-        button_3 = Button(
-            image=button_image_3,
-            borderwidth=0,
-            highlightthickness=0,
-            command=lambda: print("button_3 clicked"),
-            relief="flat"
-        )
-        button_3.place(
-            x=342.0,
-            y=341.0,
-            width=93.0,
-            height=39.0
-        )
-        window.resizable(False, False)
-        window.mainloop()
+    button_image_3 = PhotoImage(
+        file=relative_to_assets("button_3.png"))
+    button_3 = Button(
+        image=button_image_3,
+        borderwidth=0,
+        highlightthickness=0,
+        command=lambda: print("button_3 clicked"),
+        relief="flat"
+    )
+    button_3.place(
+        x=342.0,
+        y=341.0,
+        width=93.0,
+        height=39.0
+    )
+    window.resizable(False, False)
+    window.mainloop()
 
     def onModification(self, event):
         chars = event.widget.get("1.0", "end-1c")
@@ -154,17 +157,29 @@ class GUI:
 
     # recieving data
     def receive(self):
+        data = b""
         while True:
             try:
-                message = client.recv(2048).decode()
-                # handling incoming data
-                if message.startswith('txt:'):
-                    message = message[4:]
-                    # self.entry_1.delete('1.0', END)
-                    self.entry_1.replace('1.0', END, message)
+                while len(data) < self.payload_size:
+                    data += client.recv(819200)
+                packed_msg_size = data[:self.payload_size]
+                data = data[self.payload_size:]
+                msg_size = struct.unpack("Q", packed_msg_size)[0]
+                while len(data) < msg_size:
+                    data += client.recv(409600)
+                message = data[:msg_size]
+                data = data[msg_size:]
+                if str(type(pickle.loads(message))) == "<class 'PIL.Image.Image'>":
+                    self.show_stream(message)
                 else:
-                    message = '\n' + message
-                    self.entry_2.insert(END, message)
+                    # handling incoming data
+                    if message.startswith('txt:'):
+                        message = message[4:]
+                        # self.entry_1.delete('1.0', END)
+                        self.entry_1.replace('1.0', END, message)
+                    else:
+                        message = '\n' + message
+                        self.entry_2.insert(END, message)
             except error as e:
                 print(e)
                 # an error will be printed on the command line or console if there's an error
@@ -173,19 +188,28 @@ class GUI:
                 break
 
     def send_data(self, message):
-        while True:
-            client.send(pickle.dumps(message))
-            break
+        client.sendall(self.pack(message))
+
+    def pack(self, data):
+        a = pickle.dumps(data)
+        message = struct.pack("Q", len(a)) + a
+        return message
 
     def stream(self):
         t = time.time()
         while True:
             img = pyautogui.screenshot()
-            a = pickle.dumps(img)
-            message = struct.pack("Q", len(a)) + a
-            client.sendall(message)
-            print(f'FPS: {60 / (time.time() - t)}')
+            client.sendall(self.pack(img))
+            print(f'FPS: {1 / (time.time() - t)}')
             clear()
             t = time.time()
 
-g = GUI()
+    def show_stream(self, frame_data):
+        img_np = numpy.array(frame_data)
+        frame = cv2.cvtColor(img_np, cv2.COLOR_BGR2RGB)
+        cv2.imshow("RECEIVING VIDEO", frame)
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'):
+            return
+
+g = GUI().stream()
