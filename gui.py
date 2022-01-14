@@ -24,7 +24,7 @@ def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
 
 
-SERVER = '127.0.0.1'
+SERVER = '192.168.133.1'
 PORT = 1212
 ADDR = (SERVER, PORT)
 
@@ -38,10 +38,10 @@ def clear():
     # for mac and linux(here, os.name is 'posix')
     else:
         _ = system('clear')
-class GUI:
+class Client:
     def __init__(self):
         self.payload_size = struct.calcsize("Q")
-        # gui
+    def gui(self):
         window = Tk()
 
         window.geometry("700x400")
@@ -130,11 +130,12 @@ class GUI:
 
         button_image_3 = PhotoImage(
             file=relative_to_assets("button_3.png"))
+        stream = threading.Thread(target=self.stream)
         button_3 = Button(
             image=button_image_3,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: self.stream(),
+            command=lambda: stream.start(),
             relief="flat"
         )
         button_3.place(
@@ -170,17 +171,25 @@ class GUI:
                     data += client.recv(409600)
                 message = data[:msg_size]
                 data = data[msg_size:]
+                print(type(pickle.loads(message)))
                 if str(type(pickle.loads(message))) == "<class 'PIL.Image.Image'>":
-                    self.show_stream(message)
+                    img_np = numpy.array(message)
+                    frame = cv2.cvtColor(img_np, cv2.COLOR_BGR2RGB)
+                    cv2.imshow("RECEIVING VIDEO", frame)
+                    key = cv2.waitKey(1) & 0xFF
+                    if key == ord('q'):
+                        break
                 else:
+                    pass
+                    # print(message)
                     # handling incoming data
-                    if message.startswith('txt:'):
-                        message = message[4:]
-                        # self.entry_1.delete('1.0', END)
-                        self.entry_1.replace('1.0', END, message)
-                    else:
-                        message = '\n' + message
-                        self.entry_2.insert(END, message)
+                    # if message.startswith('txt:'):
+                    #     message = message[4:]
+                    #     # self.entry_1.delete('1.0', END)
+                    #     self.entry_1.replace('1.0', END, message)
+                    # else:
+                    #     message = '\n' + message
+                    #     self.entry_2.insert(END, message)
             except error as e:
                 print(e)
                 # an error will be printed on the command line or console if there's an error
@@ -205,12 +214,7 @@ class GUI:
             clear()
             t = time.time()
 
-    def show_stream(self, frame_data):
-        img_np = numpy.array(frame_data)
-        frame = cv2.cvtColor(img_np, cv2.COLOR_BGR2RGB)
-        cv2.imshow("RECEIVING VIDEO", frame)
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord('q'):
-            return
-
-g = GUI()
+g = Client()
+t = threading.Thread(target=g.receive)
+t.start()
+g.gui()

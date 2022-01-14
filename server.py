@@ -7,7 +7,7 @@ import datetime
 
 class Server:
     def __init__(self):
-        self.host = socket.gethostbyname('localhost')
+        self.host = socket.gethostbyname(socket.gethostname())
         self.port = 1212
         self.addr = (self.host, self.port)
         self.DISCONNECT_MESSAGE = '!DISCONNECT'
@@ -23,11 +23,11 @@ class Server:
         message = struct.pack("Q", len(a)) + a
         return message
 
-
     def send_to_all(self, data, new):
-        for PERSON in self.users:
-            if PERSON != new:
-                PERSON.send(self.pack(data))
+        for user in self.users:
+            if user != new:
+                user.sendall(self.pack(data))
+                print('sent')
 
     def stream_handler(self, conn, addr, data):
         if not self.stream_cooldown:
@@ -83,11 +83,11 @@ class Server:
             thread.start()
             self.users.append(conn)
             self.send_to_all(f'___________________________________________\n'
-                         f'[NEW CONNECTION]{addr[0]} connected'
-                         f'\n___________________________________________\n', conn)
+                             f'[NEW CONNECTION]{addr[0]} connected'
+                             f'\n___________________________________________\n', conn)
             print(f'\n[ACTIVE CONNECTIONS] {threading.activeCount() - 1}')
 
 
 if __name__ == '__main__':
     print('[STARTING] server is starting....')
-    Server.start()
+    Server().start()
