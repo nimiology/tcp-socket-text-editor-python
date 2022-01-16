@@ -54,12 +54,11 @@ class Server:
             data = data[self.payload_size:]
             msg_size = struct.unpack("Q", packed_msg_size)[0]
             while len(data) < msg_size:
-                data += conn.recv(409600)
+                data += conn.recv(8192000)
             message_data = data[:msg_size]
             message_decoded = pickle.loads(message_data)
             if str(type(message_decoded)) == "<class 'PIL.Image.Image'>":
                 byte_io = io.BytesIO()
-
                 message_decoded.save(byte_io, 'PNG')
                 self.stream_handler(conn, addr, self.pack(byte_io))
             else:
@@ -92,9 +91,10 @@ class Server:
             thread = threading.Thread(target=self.client_handle, args=(conn, addr))
             thread.start()
             self.users.append(conn)
-            self.send_to_all(f'___________________________________________\n'
-                             f'[NEW CONNECTION]{addr[0]} connected'
-                             f'\n___________________________________________\n', conn)
+            welcome = f'''___________________________________________
+[NEW CONNECTION]{addr[0]} connected
+___________________________________________'''
+            self.send_to_all(self.pack(welcome), conn)
             print(f'\n[ACTIVE CONNECTIONS] {threading.activeCount() - 1}')
 
 

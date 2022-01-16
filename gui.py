@@ -163,12 +163,12 @@ class Client:
         data = b""
         while True:
             while len(data) < self.payload_size:
-                data += client.recv(819200)
+                data += client.recv(8192000)
             packed_msg_size = data[:self.payload_size]
             data = data[self.payload_size:]
             msg_size = struct.unpack("Q", packed_msg_size)[0]
             while len(data) < msg_size:
-                data += client.recv(409600)
+                data += client.recv(8192000)
             message_data = data[:msg_size]
             data = data[msg_size:]
             message_decoded = pickle.loads(message_data)
