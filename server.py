@@ -1,8 +1,12 @@
+import io
 import socket
 import struct
 import threading
 import pickle
 import datetime
+
+import numpy
+from PIL import Image
 
 
 class Server:
@@ -26,7 +30,7 @@ class Server:
     def send_to_all(self, data, new):
         for user in self.users:
             if user != new:
-                user.sendall(self.pack(data))
+                user.sendall(data)
                 print('sent')
 
     def stream_handler(self, conn, addr, data):
@@ -45,17 +49,23 @@ class Server:
         data = b""
         while True:
             while len(data) < self.payload_size:
-                data += conn.recv(819200)
+                data += conn.recv(8192000)
             packed_msg_size = data[:self.payload_size]
             data = data[self.payload_size:]
             msg_size = struct.unpack("Q", packed_msg_size)[0]
             while len(data) < msg_size:
                 data += conn.recv(409600)
             message_data = data[:msg_size]
-            data = data[msg_size:]
-            if str(type(pickle.loads(message_data))) == "<class 'PIL.Image.Image'>":
-                self.stream_handler(conn, addr, message_data)
-            print(type(pickle.loads(message_data)))
+            message_decoded = pickle.loads(message_data)
+            if str(type(message_decoded)) == "<class 'PIL.Image.Image'>":
+                byte_io = io.BytesIO()
+
+                message_decoded.save(byte_io, 'PNG')
+                self.stream_handler(conn, addr, self.pack(byte_io))
+            else:
+                self.send_to_all(self.pack(message_decoded), conn)
+            print(type(message_decoded))
+            data = b""
 
         # while connected:
         #     msg_length = conn.recv(2048).decode(FORMAT)
